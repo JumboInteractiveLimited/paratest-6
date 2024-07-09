@@ -8,9 +8,7 @@ use ParaTest\Options;
 use ParaTest\Tests\TestBase;
 use PHPUnit\Framework\Attributes\CoversClass;
 
-use function defined;
 use function mt_rand;
-use function str_replace;
 use function uniqid;
 
 use const DIRECTORY_SEPARATOR;
@@ -20,15 +18,15 @@ use const DIRECTORY_SEPARATOR;
 final class OptionsTest extends TestBase
 {
     private Options $options;
-    /** @var array<string, string>  */
+    /** @var array<non-empty-string, non-empty-string|list<non-empty-string>>  */
     private array $unfiltered;
 
     public function setUpTest(): void
     {
         $this->unfiltered = [
             '--processes' => '5',
-            '--group' => 'group1',
-            '--exclude-group' => 'group2',
+            '--group' => ['group1'],
+            '--exclude-group' => ['group2'],
             '--bootstrap' => '/path/to/bootstrap',
             'path' => '/path/to/tests',
         ];
@@ -38,7 +36,7 @@ final class OptionsTest extends TestBase
 
     public function testFilteredOptionsShouldContainExtraneousOptions(): void
     {
-        self::assertEquals('group1', $this->options->phpunitOptions['group']);
+        self::assertEquals(['group1'], $this->options->phpunitOptions['group']);
         self::assertEquals('/path/to/bootstrap', $this->options->phpunitOptions['bootstrap']);
     }
 
@@ -52,9 +50,6 @@ final class OptionsTest extends TestBase
     public function testPassthru(): void
     {
         $argv = ['--passthru-php' => "'-d' 'zend_extension=xdebug.so'"];
-        if (defined('PHP_WINDOWS_VERSION_BUILD')) {
-            $argv['--passthru-php'] = str_replace('\'', '"', $argv['--passthru-php']);
-        }
 
         $options = $this->createOptionsFromArgv($argv);
 

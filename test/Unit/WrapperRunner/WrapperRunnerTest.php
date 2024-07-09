@@ -25,7 +25,6 @@ use Symfony\Component\Process\Process;
 use function array_diff;
 use function array_reverse;
 use function array_unique;
-use function defined;
 use function explode;
 use function file_get_contents;
 use function file_put_contents;
@@ -223,9 +222,6 @@ final class WrapperRunnerTest extends TestBase
         self::assertSame(RunnerInterface::FAILURE_EXIT, $runnerResult->exitCode);
 
         $this->bareOptions['--passthru-php'] = sprintf("'-d' 'highlight.comment=%s'", self::PASSTHRU_PHP_CUSTOM);
-        if (defined('PHP_WINDOWS_VERSION_BUILD')) {
-            $this->bareOptions['--passthru-php'] = str_replace('\'', '"', $this->bareOptions['--passthru-php']);
-        }
 
         $runnerResult = $this->runRunner();
         self::assertSame(RunnerInterface::SUCCESS_EXIT, $runnerResult->exitCode);
@@ -705,6 +701,34 @@ EOF;
         $runnerResult                         = $this->runRunner();
 
         self::assertStringNotContainsString('101 / 1000 ( 10%)  202 / 1000 ( 20%)', $runnerResult->output);
+        self::assertEquals(RunnerInterface::SUCCESS_EXIT, $runnerResult->exitCode);
+    }
+
+
+    #[Group('github')]
+    #[CoversNothing]
+    public function testCliOptionsThatCouldBeUsedMultipleTimes(): void
+    {
+        $this->bareOptions['--configuration'] = $this->fixture('github' . DIRECTORY_SEPARATOR . 'GH857' . DIRECTORY_SEPARATOR . 'phpunit.xml');
+        $this->bareOptions['--group']         = [
+            'one',
+            'two',
+        ];
+
+        $runnerResult = $this->runRunner();
+
+        $expectedOutput = <<<'EOF'
+Processes:     %s
+Runtime:       PHP %s
+Configuration: %s
+
+..                                                                  2 / 2 (100%)
+
+Time: %s, Memory: %s MB
+
+OK%a
+EOF;
+        self::assertStringMatchesFormat($expectedOutput, $runnerResult->output);
         self::assertEquals(RunnerInterface::SUCCESS_EXIT, $runnerResult->exitCode);
     }
 
