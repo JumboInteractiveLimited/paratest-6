@@ -13,16 +13,21 @@ use function array_map;
 use function array_slice;
 use function assert;
 use function filesize;
+use function getenv;
 use function is_file;
 use function unlink;
 
 /** @internal */
 final class CoverageMerger
 {
+    private int $testLimit;
+
     public function __construct(
-        private ?CodeCoverage $coverage = null,
-        private readonly int $testLimit = 0,
+        private ?CodeCoverage $coverage = null
     ) {
+        // PHPUnit 10>= does not allow custom cli options, so we need to inject this via an env
+        $testLimitFromEnv = getenv('PARATEST_COVERAGE_TEST_LIMIT');
+        $this->testLimit  = $testLimitFromEnv !== false ? (int) $testLimitFromEnv : 0;
     }
 
     private function addCoverage(CodeCoverage $coverage): void
