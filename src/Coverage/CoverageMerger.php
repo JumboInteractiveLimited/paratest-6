@@ -46,7 +46,7 @@ final class CoverageMerger
             $extra = 'This means a PHPUnit process has crashed.';
             if (! (new Runtime())->canCollectCodeCoverage()) {
                 // @codeCoverageIgnoreStart
-                $extra = 'No coverage driver found! Enable of of Xdebug, PHPDBG or PCOV for coverage.';
+                $extra = 'No coverage driver found! Enable Xdebug, PHPDBG or PCOV for coverage.';
                 // @codeCoverageIgnoreEnd
             }
 

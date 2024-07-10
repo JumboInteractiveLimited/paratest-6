@@ -329,6 +329,10 @@ final class WrapperRunner implements RunnerInterface
         );
         $coverageMerger = new CoverageMerger($coverageManager->codeCoverage());
         foreach ($this->coverageFiles as $coverageFile) {
+            if ($coverageFile->getRealPath() === false) {
+                continue;
+            }
+
             $coverageMerger->addCoverageFromFile($coverageFile->getRealPath());
         }
 
